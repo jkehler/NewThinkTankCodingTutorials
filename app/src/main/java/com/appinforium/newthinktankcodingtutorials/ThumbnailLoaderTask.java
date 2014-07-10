@@ -11,7 +11,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
 
-public class ThumbnailLoaderTask extends AsyncTask<List<YoutubeAPI.PlaylistItem>, Void, Void> {
+public class ThumbnailLoaderTask extends AsyncTask<List<YoutubeAPI.YoutubeItem>, Void, Void> {
 
     private OnThumbnailLoadedListener listener;
 
@@ -26,10 +26,10 @@ public class ThumbnailLoaderTask extends AsyncTask<List<YoutubeAPI.PlaylistItem>
     }
 
     @Override
-    protected Void doInBackground(List<YoutubeAPI.PlaylistItem>... lists) {
-        List<YoutubeAPI.PlaylistItem> items = lists[0];
+    protected Void doInBackground(List<YoutubeAPI.YoutubeItem>... lists) {
+        List<YoutubeAPI.YoutubeItem> items = lists[0];
         for (int i = 0; i < items.size(); i++) {
-            String url = items.get(i).getThumbnailUrl();
+            String url = items.get(i).thumbnailUrl;
             Bitmap bitmap = downloadImage(url);
             listener.onThumbnailLoaded(bitmap, i);
         }

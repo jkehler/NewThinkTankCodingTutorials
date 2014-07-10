@@ -4,10 +4,13 @@ import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
+import java.util.List;
 
 
 /**
@@ -21,6 +24,8 @@ import android.view.ViewGroup;
  */
 public class VideoListFragment extends Fragment {
 
+
+    PlaylistAdapter playlistAdapter;
 //    private OnFragmentInteractionListener mListener;
 
 //    public static VideoListFragment newInstance(String param1, String param2) {
@@ -48,8 +53,19 @@ public class VideoListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_video_list, container, false);
+        View viewHierarchy = inflater.inflate(R.layout.fragment_video_list, container, false);
+
+        ListView videoListView = (ListView) viewHierarchy.findViewById(R.id.videoListView);
+        playlistAdapter = new PlaylistAdapter(getActivity());
+        videoListView.setAdapter(playlistAdapter);
+        return viewHierarchy;
+
     }
+
+    public void updateVideoList(List<YoutubeAPI.YoutubeItem> items) {
+        playlistAdapter.setData(items);
+    }
+
 
     // TODO: Rename method, update argument and hook method into UI event
 //    public void onButtonPressed(Uri uri) {

@@ -1,17 +1,32 @@
 package com.appinforium.newthinktankcodingtutorials;
 
+import android.annotation.TargetApi;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.appinforium.newthinktankcodingtutorials.R;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlaylistActivity extends ActionBarActivity {
 
     YoutubeAPI ytApi;
     String playlistId;
     String playlistTitle;
+    List<YoutubeAPI.YoutubeItem> videoItems;
+    FragmentManager fragmentManager;
+    VideoListFragment videoListFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +39,13 @@ public class PlaylistActivity extends ActionBarActivity {
         playlistTitle = intent.getStringExtra(PlaylistsActivity.PLAYLIST_TITLE_MESSAGE);
         playlistId = intent.getStringExtra(PlaylistsActivity.PLAYLIST_ID_MESSAGE);
         this.setTitle(playlistTitle);
+
+        fragmentManager = getSupportFragmentManager();
+        videoListFragment = (VideoListFragment) fragmentManager.findFragmentById(R.id.fragmentVideoList);
+
+
+        GetVideos getVideos = new GetVideos();
+        getVideos.execute();
     }
 
 
@@ -44,5 +66,30 @@ public class PlaylistActivity extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private class GetVideos extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            videoItems = ytApi.getPlaylistItems(playlistId, 50);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+//            for (int i = 0; i < videoItems.size(); i++) {
+//                Log.d("videoId", videoItems.get(i).videoId);
+//            }
+
+            videoListFragment.updateVideoList(videoItems);
+
+//            playlistsAdapter.setData(response);
+//            playlistsAdapter.notifyDataSetChanged();
+//            new ThumbnailLoaderTask(playlistsAdapter).execute(response);
+
+        }
     }
 }

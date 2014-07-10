@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -38,94 +40,22 @@ public class YoutubeAPI {
     }
 
 
-    public class PlaylistVideoItem {
-
+    static class YoutubeItem {
+        String playlistId;
+        String videoId;
+        String title;
+        String description;
+        String thumbnailUrl;
+        String publishedAt;
+        int thumbnailWidth;
+        int thumbnailHeight;
     }
 
-    public class PlaylistItem {
-        private String playlistId;
-        private String title;
-        private String description;
-        private String thumbnailUrl;
-        private int thumbnailWidth;
-        private int thumbnailHeight;
-        private Bitmap thumbnailBitmap;
-        private ImageView thumbnailImageView;
+    public List<YoutubeItem> getPlaylistItems(String playlistId, int maxResults) {
+        String strUrl = String.format("https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=%d&playlistId=%s&key=%s",
+                maxResults, playlistId, this.developerKey);
 
-        public String getPlaylistId() {
-            return playlistId;
-        }
-
-        public void setPlaylistId(String playlistId) {
-            this.playlistId = playlistId;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public void setTitle(String title) {
-            this.title = title;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
-        public int getThumbnailWidth() {
-            return thumbnailWidth;
-        }
-
-        public void setThumbnailWidth(int thumbnailWidth) {
-            this.thumbnailWidth = thumbnailWidth;
-        }
-
-        public int getThumbnailHeight() {
-            return thumbnailHeight;
-        }
-
-        public void setThumbnailHeight(int thumbnailHeight) {
-            this.thumbnailHeight = thumbnailHeight;
-        }
-
-        public String getThumbnailUrl() {
-            return thumbnailUrl;
-        }
-
-        public void setThumbnailUrl(String thumbnailUrl) {
-            this.thumbnailUrl = thumbnailUrl;
-        }
-
-        public Bitmap getThumbnailBitmap() {
-            return thumbnailBitmap;
-        }
-
-        public void setThumbnailBitmap(Bitmap thumbnailBitmap) {
-            this.thumbnailBitmap = thumbnailBitmap;
-        }
-
-        public ImageView getThumbnailImageView() {
-            return thumbnailImageView;
-        }
-
-        public void setThumbnailImageView(ImageView thumbnailImageView) {
-            this.thumbnailImageView = thumbnailImageView;
-        }
-    }
-
-    public void getPlaylistItems(String playlistId, int maxResults) {
-
-    }
-
-    public List<PlaylistItem> getChannelPlaylists(String channelId, int maxResults) {
-        String strUrl = String.format("https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=%s&maxResults=%d&key=%s",
-                channelId, maxResults, this.developerKey);
-
-        List<PlaylistItem> playlistItems = new ArrayList<PlaylistItem>();
+        List<YoutubeItem> videoItems = new ArrayList<YoutubeItem>();
 
         String jsonStr = makeApiConnection(strUrl);
 
@@ -150,22 +80,83 @@ public class YoutubeAPI {
                 for (int i = 0; i < items.length(); i++) {
                     JSONObject item = items.getJSONObject(i);
 
-                    PlaylistItem playlistItem = new PlaylistItem();
-
-                    playlistItem.setPlaylistId(item.getString("id"));
+                    YoutubeItem videoItem = new YoutubeItem();
 
                     JSONObject snippet = item.getJSONObject("snippet");
 
-                    playlistItem.setTitle(snippet.getString("title"));
-                    playlistItem.setDescription(snippet.getString("description"));
+                    videoItem.title = snippet.getString("title");
+                    videoItem.description = snippet.getString("description");
+                    videoItem.publishedAt = snippet.getString("publishedAt");
+                    videoItem.playlistId = snippet.getString("playlistId");
+
+                    JSONObject thumbnails = snippet.getJSONObject("thumbnails");
+                    JSONObject thumbnail = thumbnails.getJSONObject("medium");
+
+                    videoItem.thumbnailUrl = thumbnail.getString("url");
+                    videoItem.thumbnailHeight = Integer.valueOf(thumbnail.getString("height"));
+                    videoItem.thumbnailWidth = Integer.valueOf(thumbnail.getString("width"));
+
+                    JSONObject resourceId = snippet.getJSONObject("resourceId");
+
+                    videoItem.videoId = resourceId.getString("videoId");
+
+                    videoItems.add(videoItem);
+                }
+
+            } catch (JSONException e) {
+                 e.printStackTrace();
+                Log.e("JSONException", e.toString());
+            }
+        }
+
+        return videoItems;
+    }
+
+    public List<YoutubeItem> getChannelPlaylists(String channelId, int maxResults) {
+        String strUrl = String.format("https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=%s&maxResults=%d&key=%s",
+                channelId, maxResults, this.developerKey);
+
+        List<YoutubeItem> playlistItems = new ArrayList<YoutubeItem>();
+
+        String jsonStr = makeApiConnection(strUrl);
+
+        if (jsonStr != null) {
+            try {
+                JSONObject jsonObject = new JSONObject(jsonStr);
+
+                JSONObject pageInfo = jsonObject.getJSONObject("pageInfo");
+                String totalResults = pageInfo.getString("totalResults");
+                String resultsPerPage = pageInfo.getString("resultsPerPage");
+
+                String nextPageToken;
+                try {
+                    nextPageToken = jsonObject.getString("nextPageToken");
+                } catch (JSONException e) {
+                    nextPageToken = null;
+                }
+
+                JSONArray items = null;
+                items = jsonObject.getJSONArray("items");
+
+                for (int i = 0; i < items.length(); i++) {
+                    JSONObject item = items.getJSONObject(i);
+
+                    YoutubeItem playlistItem = new YoutubeItem();
+
+                    playlistItem.playlistId = item.getString("id");
+
+                    JSONObject snippet = item.getJSONObject("snippet");
+
+                    playlistItem.title = snippet.getString("title");
+                    playlistItem.description = snippet.getString("description");
 
                     JSONObject thumbnails = snippet.getJSONObject("thumbnails");
 
                     JSONObject thumbnail = thumbnails.getJSONObject("medium");
 
-                    playlistItem.setThumbnailUrl(thumbnail.getString("url"));
-                    playlistItem.setThumbnailHeight(Integer.valueOf(thumbnail.getString("height")));
-                    playlistItem.setThumbnailWidth(Integer.valueOf(thumbnail.getString("width")));
+                    playlistItem.thumbnailUrl = thumbnail.getString("url");
+                    playlistItem.thumbnailHeight = Integer.valueOf(thumbnail.getString("height"));
+                    playlistItem.thumbnailWidth = Integer.valueOf(thumbnail.getString("width"));
 
                     playlistItems.add(playlistItem);
                 }

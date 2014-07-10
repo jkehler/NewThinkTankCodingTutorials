@@ -27,14 +27,14 @@ public class PlaylistsAdapter extends BaseAdapter implements
         handler = new Handler();
     }
 
-    public void setData(List<YoutubeAPI.PlaylistItem> data) {
+    public void setData(List<YoutubeAPI.YoutubeItem> data) {
         if (data != null) {
-            for (YoutubeAPI.PlaylistItem item : data) {
+            for (YoutubeAPI.YoutubeItem item : data) {
                 ViewItem viewItem = new ViewItem();
-                viewItem.thumbnailUrl = item.getThumbnailUrl();
-                viewItem.description = item.getDescription();
-                viewItem.title = item.getTitle();
-                viewItem.playlistId = item.getPlaylistId();
+                viewItem.thumbnailUrl = item.thumbnailUrl;
+                viewItem.description = item.description;
+                viewItem.title = item.title;
+                viewItem.playlistId = item.playlistId;
                 items.add(viewItem);
             }
 

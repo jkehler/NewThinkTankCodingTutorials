@@ -72,7 +72,7 @@ public class PlaylistsActivity extends ActionBarActivity implements AdapterView.
 
     private class GetPlaylists extends AsyncTask<Void, Void, Void> {
 
-        List<YoutubeAPI.PlaylistItem> response;
+        List<YoutubeAPI.YoutubeItem> response;
 
         @Override
         protected Void doInBackground(Void... voids) {
