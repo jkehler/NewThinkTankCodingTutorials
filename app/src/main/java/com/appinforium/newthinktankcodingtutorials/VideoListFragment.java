@@ -1,6 +1,7 @@
 package com.appinforium.newthinktankcodingtutorials;
 
 import android.app.Activity;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,6 +10,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+
+import com.appinforium.newthinktankcodingtutorials.adapter.PlaylistCursorAdapter;
+import com.appinforium.newthinktankcodingtutorials.data.YoutubeDatabase;
+import com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider;
 
 import java.util.List;
 
@@ -24,8 +29,10 @@ import java.util.List;
  */
 public class VideoListFragment extends Fragment {
 
+    private static final String DEBUG_TAG = "VideoListFragment";
+    PlaylistCursorAdapter adapter;
 
-    PlaylistAdapter playlistAdapter;
+//    PlaylistAdapter playlistAdapter;
 //    private OnFragmentInteractionListener mListener;
 
 //    public static VideoListFragment newInstance(String param1, String param2) {
@@ -55,16 +62,36 @@ public class VideoListFragment extends Fragment {
         // Inflate the layout for this fragment
         View viewHierarchy = inflater.inflate(R.layout.fragment_video_list, container, false);
 
+        String[] projection = { YoutubeDatabase.ID, YoutubeDatabase.COL_VIDEO_ID, YoutubeDatabase.COL_TITLE, YoutubeDatabase.COL_THUMBNAIL_BITMAP };
+
+        Log.d(DEBUG_TAG, "intent videoId: " + getActivity().getIntent().getStringExtra(PlaylistsActivity.PLAYLIST_ID_MESSAGE));
+
+        Uri content_uri = Uri.withAppendedPath(
+                YoutubeProvider.VIDEOS_CONTENT_URI,
+                getActivity().getIntent().getStringExtra(PlaylistsActivity.PLAYLIST_ID_MESSAGE)
+        );
+
+        Log.d(DEBUG_TAG, "content_uri: " + content_uri);
+        Cursor cursor = getActivity().getContentResolver().query(content_uri, projection, null, null, null);
+
+        Log.d(DEBUG_TAG, "item count: " + String.valueOf(cursor.getCount()));
+
+//                Uri.withAppendedPath(YoutubeProvider.VIDEOS_CONTENT_URI,
+//                        getActivity().getIntent().getStringExtra(PlaylistsActivity.PLAYLIST_ID_MESSAGE)),
+//                projection, null, null, null);
+//
+        adapter = new PlaylistCursorAdapter(getActivity(), cursor, true);
         ListView videoListView = (ListView) viewHierarchy.findViewById(R.id.videoListView);
-        playlistAdapter = new PlaylistAdapter(getActivity());
-        videoListView.setAdapter(playlistAdapter);
+        videoListView.setAdapter(adapter);
+//        playlistAdapter = new PlaylistAdapter(getActivity());
+//        videoListView.setAdapter(playlistAdapter);
         return viewHierarchy;
 
     }
 
-    public void updateVideoList(List<YoutubeAPI.YoutubeItem> items) {
-        playlistAdapter.setData(items);
-    }
+//    public void updateVideoList(List<YoutubeAPI.YoutubeItem> items) {
+//        //playlistAdapter.setData(items);
+//    }
 
 
     // TODO: Rename method, update argument and hook method into UI event

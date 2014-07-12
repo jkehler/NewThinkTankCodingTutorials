@@ -1,22 +1,17 @@
 package com.appinforium.newthinktankcodingtutorials;
 
-import android.annotation.TargetApi;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import com.appinforium.newthinktankcodingtutorials.R;
+import android.view.View;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.ArrayList;
+import com.appinforium.newthinktankcodingtutorials.service.PlaylistDownloaderService;
+
 import java.util.List;
 
 public class PlaylistActivity extends ActionBarActivity {
@@ -27,6 +22,8 @@ public class PlaylistActivity extends ActionBarActivity {
     List<YoutubeAPI.YoutubeItem> videoItems;
     FragmentManager fragmentManager;
     VideoListFragment videoListFragment;
+
+    private static final String DEBUG_TAG = "PlaylistActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +41,8 @@ public class PlaylistActivity extends ActionBarActivity {
         videoListFragment = (VideoListFragment) fragmentManager.findFragmentById(R.id.fragmentVideoList);
 
 
-        GetVideos getVideos = new GetVideos();
-        getVideos.execute();
+//        GetVideos getVideos = new GetVideos();
+//        getVideos.execute();
     }
 
 
@@ -68,6 +65,13 @@ public class PlaylistActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void refreshClicked(View view) {
+        Intent intent = new Intent(getApplicationContext(), PlaylistDownloaderService.class);
+        Log.d(DEBUG_TAG, "refreshClicked - playlist_id: " + playlistId);
+        intent.putExtra("playlist_id", playlistId);
+        startService(intent);
+    }
+
     private class GetVideos extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -84,7 +88,7 @@ public class PlaylistActivity extends ActionBarActivity {
 //                Log.d("videoId", videoItems.get(i).videoId);
 //            }
 
-            videoListFragment.updateVideoList(videoItems);
+            //videoListFragment.updateVideoList(videoItems);
 
 //            playlistsAdapter.setData(response);
 //            playlistsAdapter.notifyDataSetChanged();
