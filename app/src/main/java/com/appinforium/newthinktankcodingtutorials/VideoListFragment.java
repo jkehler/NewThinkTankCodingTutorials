@@ -76,15 +76,10 @@ public class VideoListFragment extends Fragment {
 
         Log.d(DEBUG_TAG, "item count: " + String.valueOf(cursor.getCount()));
 
-//                Uri.withAppendedPath(YoutubeProvider.VIDEOS_CONTENT_URI,
-//                        getActivity().getIntent().getStringExtra(PlaylistsActivity.PLAYLIST_ID_MESSAGE)),
-//                projection, null, null, null);
-//
         adapter = new PlaylistCursorAdapter(getActivity(), cursor, true);
         ListView videoListView = (ListView) viewHierarchy.findViewById(R.id.videoListView);
         videoListView.setAdapter(adapter);
-//        playlistAdapter = new PlaylistAdapter(getActivity());
-//        videoListView.setAdapter(playlistAdapter);
+
         return viewHierarchy;
 
     }

@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.appinforium.newthinktankcodingtutorials.service.PlaylistDownloaderService;
+import com.appinforium.newthinktankcodingtutorials.service.ThumbnailDownloaderService;
 
 import java.util.List;
 
@@ -70,6 +71,10 @@ public class PlaylistActivity extends ActionBarActivity {
         Log.d(DEBUG_TAG, "refreshClicked - playlist_id: " + playlistId);
         intent.putExtra("playlist_id", playlistId);
         startService(intent);
+
+        Intent thumbnailIntent = new Intent(getApplicationContext(), ThumbnailDownloaderService.class);
+        thumbnailIntent.putExtra("playlist_id", playlistId);
+        startService(thumbnailIntent);
     }
 
     private class GetVideos extends AsyncTask<Void, Void, Void> {

@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.apache.http.auth.AUTH;
@@ -33,6 +34,8 @@ public class YoutubeProvider extends ContentProvider {
     private static final int GET_PLAYLIST_ID = 101;
     private static final int GET_PLAYLIST_VIDEOS = 102;
     private static final int GET_PLAYLIST_VIDEO_ID = 103;
+    private static final int GET_NULL_PLAYLIST_THUMBNAILS = 104;
+    private static final int GET_NULL_VIDEO_THUMBNAILS = 105;
 
     private static final UriMatcher sURIMatcher = new UriMatcher(
             UriMatcher.NO_MATCH);
@@ -48,10 +51,18 @@ public class YoutubeProvider extends ContentProvider {
 
         // content://com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider/videos/*/#
         sURIMatcher.addURI(AUTHORITY, "videos/*/#", GET_PLAYLIST_VIDEO_ID);
+
+        // content://com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider/null_thumbnails
+        sURIMatcher.addURI(AUTHORITY, "null_thumbnails", GET_NULL_PLAYLIST_THUMBNAILS);
+
+        // content://com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider/null_thumbnails/*
+        sURIMatcher.addURI(AUTHORITY, "null_thumbnails/*", GET_NULL_VIDEO_THUMBNAILS);
+
     }
 
     public static final Uri PLAYLISTS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/playlists");
     public static final Uri VIDEOS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/videos");
+    public static final Uri THUMBNAILS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/null_thumbnails");
 
     public boolean onCreate() {
         mDB = new YoutubeDatabase(getContext());
@@ -64,10 +75,7 @@ public class YoutubeProvider extends ContentProvider {
 
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 
-        Log.d(DEBUG_TAG, "query uri: " + uri.toString());
         int uriType = sURIMatcher.match(uri);
-
-        Log.d(DEBUG_TAG, "uriType: " + uriType);
 
         switch (uriType) {
             case GET_PLAYLIST_ID:
@@ -86,6 +94,13 @@ public class YoutubeProvider extends ContentProvider {
                 break;
             case GET_PLAYLIST_VIDEOS:
                 queryBuilder.setTables(YoutubeDatabase.TABLE_VIDEOS);
+                queryBuilder.appendWhere(YoutubeDatabase.COL_PLAYLIST_ID + " = '"
+                        + uri.getLastPathSegment() + "'");
+                break;
+            case GET_NULL_VIDEO_THUMBNAILS:
+                queryBuilder.setTables(YoutubeDatabase.TABLE_VIDEOS);
+                queryBuilder.appendWhere(YoutubeDatabase.COL_THUMBNAIL_BITMAP + " is null and ");
+                queryBuilder.appendWhere(YoutubeDatabase.COL_THUMBNAIL_URL + " is not null and ");
                 queryBuilder.appendWhere(YoutubeDatabase.COL_PLAYLIST_ID + " = '"
                         + uri.getLastPathSegment() + "'");
                 break;
@@ -148,7 +163,31 @@ public class YoutubeProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues contentValues, String s, String[] strings) {
-        return 0;
+    public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
+
+        int uriType = sURIMatcher.match(uri);
+        SQLiteDatabase db = mDB.getWritableDatabase();
+
+        Log.d(DEBUG_TAG, "update uri: " + uri);
+        int rowsAffected = 0;
+
+        switch (uriType) {
+            case GET_PLAYLIST_VIDEO_ID:
+                String id = uri.getLastPathSegment();
+                StringBuilder modSelection = new StringBuilder(YoutubeDatabase.ID + "=" + id);
+
+                if (!TextUtils.isEmpty(selection)) {
+                    modSelection.append(" AND " + selection);
+                }
+
+                rowsAffected = db.update(YoutubeDatabase.TABLE_VIDEOS,
+                        contentValues, modSelection.toString(), selectionArgs);
+
+                Log.d(DEBUG_TAG, "rowsAffected: " + String.valueOf(rowsAffected));
+                break;
+        }
+
+        getContext().getContentResolver().notifyChange(uri, null);
+        return rowsAffected;
     }
 }
