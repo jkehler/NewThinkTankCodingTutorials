@@ -3,6 +3,7 @@ package com.appinforium.newthinktankcodingtutorials.service;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.util.DebugUtils;
@@ -133,7 +134,10 @@ public class PlaylistDownloaderService extends Service {
                         videoData.put(YoutubeDatabase.COL_PUBLISHED_AT, publishedAt);
                         videoData.put(YoutubeDatabase.COL_POSITION, Integer.valueOf(position));
 
-                        getContentResolver().insert(YoutubeProvider.VIDEO_CONTENT_URI, videoData);
+                        Uri content_uri = Uri.withAppendedPath(YoutubeProvider.VIDEOS_CONTENT_URI, playlistId);
+                        Log.d(DEBUG_TAG, "content_uri: " + content_uri);
+
+                        getContentResolver().insert(content_uri, videoData);
                     }
 
                 } catch (JSONException e) {

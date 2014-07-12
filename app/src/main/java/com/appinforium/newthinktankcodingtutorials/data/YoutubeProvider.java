@@ -25,46 +25,33 @@ public class YoutubeProvider extends ContentProvider {
 
     private YoutubeDatabase mDB;
 
+
+
     private static final String AUTHORITY = "com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider";
-    public static final int PLAYLISTS = 100;
-    public static final int PLAYLIST_ID = 101;
-    public static final int PLAYLIST_STR_ID = 102;
-    public static final int PLAYLIST_VIDEOS = 200;
-    public static final int VIDEO_ID = 201;
-    public static final int VIDEO = 202;
 
-    private static final String PLAYLISTS_BASE_PATH = "playlists";
-    private static final String VIDEO_BASE_PATH = "video";
-    private static final String VIDEOS_BASE_PATH = "videos";
-
-    public static final Uri PLAYLISTS_CONTENT_URI = Uri.parse("content://" + AUTHORITY
-                + "/" + PLAYLISTS_BASE_PATH);
-    public static final Uri VIDEO_CONTENT_URI = Uri.parse("content://" + AUTHORITY
-                + "/" + VIDEO_BASE_PATH);
-    public static final Uri VIDEOS_CONTENT_URI = Uri.parse("content://" + AUTHORITY
-                + "/" + VIDEOS_BASE_PATH);
-
-//    public static final String PLAYLIST_CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
-//            + "/mt-playlist";
-//    public static final String PLAYLIST_CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
-//            + "/mt-playlist";
-//
-//    public static final String VIDEO_CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
-//            + "/mt-video";
-//    public static final String VIDEO_CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
-//            + "/mt-video";
+    private static final int GET_PLAYLISTS = 100;
+    private static final int GET_PLAYLIST_ID = 101;
+    private static final int GET_PLAYLIST_VIDEOS = 102;
+    private static final int GET_PLAYLIST_VIDEO_ID = 103;
 
     private static final UriMatcher sURIMatcher = new UriMatcher(
             UriMatcher.NO_MATCH);
     static {
-        sURIMatcher.addURI(AUTHORITY, PLAYLISTS_BASE_PATH, PLAYLISTS);
-        sURIMatcher.addURI(AUTHORITY, PLAYLISTS_BASE_PATH + "/#", PLAYLIST_ID);
-        //sURIMatcher.addURI(AUTHORITY, VIDEOS_BASE_PATH playlist/#", PLAYLIST_VIDEOS);
-        //sURIMatcher.addURI(AUTHORITY, VIDEOS_BASE_PATH, VIDEOS);
-        sURIMatcher.addURI(AUTHORITY, VIDEO_BASE_PATH, VIDEO);
-        sURIMatcher.addURI(AUTHORITY, VIDEO_BASE_PATH + "/#", VIDEO_ID);
-        sURIMatcher.addURI(AUTHORITY, VIDEOS_BASE_PATH + "/*", PLAYLIST_VIDEOS);
+        // content://com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider/playlists
+        sURIMatcher.addURI(AUTHORITY, "playlists", GET_PLAYLISTS);
+
+        // content://com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider/playlists/#
+        sURIMatcher.addURI(AUTHORITY, "playlists/#", GET_PLAYLIST_ID);
+
+        // content://com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider/videos/*
+        sURIMatcher.addURI(AUTHORITY, "videos/*", GET_PLAYLIST_VIDEOS);
+
+        // content://com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider/videos/*/#
+        sURIMatcher.addURI(AUTHORITY, "videos/*/#", GET_PLAYLIST_VIDEO_ID);
     }
+
+    public static final Uri PLAYLISTS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/playlists");
+    public static final Uri VIDEOS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/videos");
 
     public boolean onCreate() {
         mDB = new YoutubeDatabase(getContext());
@@ -83,21 +70,21 @@ public class YoutubeProvider extends ContentProvider {
         Log.d(DEBUG_TAG, "uriType: " + uriType);
 
         switch (uriType) {
-            case PLAYLIST_ID:
+            case GET_PLAYLIST_ID:
                 queryBuilder.setTables(YoutubeDatabase.TABLE_PLAYLISTS);
                 queryBuilder.appendWhere(YoutubeDatabase.ID + "="
                         + uri.getLastPathSegment());
                 break;
-            case PLAYLISTS:
+            case GET_PLAYLISTS:
                 queryBuilder.setTables(YoutubeDatabase.TABLE_PLAYLISTS);
                 // no filter
                 break;
-            case VIDEO_ID:
+            case GET_PLAYLIST_VIDEO_ID:
                 queryBuilder.setTables(YoutubeDatabase.TABLE_VIDEOS);
                 queryBuilder.appendWhere(YoutubeDatabase.ID + "="
                         + uri.getLastPathSegment());
                 break;
-            case PLAYLIST_VIDEOS:
+            case GET_PLAYLIST_VIDEOS:
                 queryBuilder.setTables(YoutubeDatabase.TABLE_VIDEOS);
                 queryBuilder.appendWhere(YoutubeDatabase.COL_PLAYLIST_ID + " = '"
                         + uri.getLastPathSegment() + "'");
@@ -127,21 +114,21 @@ public class YoutubeProvider extends ContentProvider {
         Log.d(DEBUG_TAG, "uriType: " + String.valueOf(uriType));
 
         switch (uriType) {
-            case VIDEO:
+            case GET_PLAYLIST_VIDEOS:
                 try {
                     long newID = db.insertOrThrow(YoutubeDatabase.TABLE_VIDEOS,
                             null, contentValues);
                     if (newID > 0) {
-                        Log.d(DEBUG_TAG, "we here?");
                         Uri newUri = ContentUris.withAppendedId(uri, newID);
-                        getContext().getContentResolver().notifyChange(uri, null);
-                        db.close();
+                        //Log.d(DEBUG_TAG, "notifyChange uri: " + uri);
+                        //Log.d(DEBUG_TAG, "notifyChange newUri: " + newUri);
+                        getContext().getContentResolver().notifyChange(newUri, null);
                         return newUri;
                     } else {
                         throw new SQLException("Failed to insert row into " + uri);
                     }
                 } catch (SQLiteConstraintException e) {
-                    Log.i(DEBUG_TAG, "Ignoring constraint failure.", e);
+                    Log.i(DEBUG_TAG, "Ignoring constraint failure.");
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
