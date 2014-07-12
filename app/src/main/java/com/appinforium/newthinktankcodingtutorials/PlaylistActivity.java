@@ -72,9 +72,6 @@ public class PlaylistActivity extends ActionBarActivity {
         intent.putExtra("playlist_id", playlistId);
         startService(intent);
 
-        Intent thumbnailIntent = new Intent(getApplicationContext(), ThumbnailDownloaderService.class);
-        thumbnailIntent.putExtra("playlist_id", playlistId);
-        startService(thumbnailIntent);
     }
 
     private class GetVideos extends AsyncTask<Void, Void, Void> {

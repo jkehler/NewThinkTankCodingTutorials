@@ -31,10 +31,10 @@ import java.text.SimpleDateFormat;
 public class PlaylistDownloaderService extends Service {
 
     private static final String DEBUG_TAG = "PlaylistDownloaderService";
+    String playlistId;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String playlistId;
 
         playlistId = intent.getStringExtra("playlist_id");
 
@@ -72,6 +72,13 @@ public class PlaylistDownloaderService extends Service {
                 succeeded = jsonParse(url);
             }
             return succeeded;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            Intent thumbnailIntent = new Intent(getApplicationContext(), ThumbnailDownloaderService.class);
+            thumbnailIntent.putExtra("playlist_id", playlistId);
+            startService(thumbnailIntent);
         }
 
 
