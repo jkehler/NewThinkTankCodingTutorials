@@ -32,24 +32,25 @@ public class PlaylistDownloaderService extends Service {
 
     private static final String DEBUG_TAG = "PlaylistDownloaderService";
     String playlistId;
+    String strUrl;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         playlistId = intent.getStringExtra("playlist_id");
 
-        String strUrl = String.format(
+        strUrl = String.format(
                 "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=%s&playlistId=%s&key=%s",
                 getResources().getString(R.string.api_max_results),
                 playlistId, getResources().getString(R.string.youtube_api_key));
 
-        try {
-            URL apiUrl = new URL(strUrl);
+        //try {
+        //    URL apiUrl = new URL(strUrl);
             YoutubeAPITask youtubeAPITask = new YoutubeAPITask();
-            youtubeAPITask.execute(apiUrl);
-        } catch (MalformedURLException e) {
-            Log.e(DEBUG_TAG, "Malformed URL: " + strUrl);
-        }
+            youtubeAPITask.execute(strUrl);
+//        } catch (MalformedURLException e) {
+//            Log.e(DEBUG_TAG, "Malformed URL: " + strUrl);
+//        }
 
         return Service.START_FLAG_REDELIVERY;
     }
@@ -59,14 +60,14 @@ public class PlaylistDownloaderService extends Service {
         return null;
     }
 
-    private class YoutubeAPITask extends AsyncTask<URL, Void, Boolean> {
+    private class YoutubeAPITask extends AsyncTask<String, Void, Boolean> {
 
         private static final String DEBUG_TAG = "YoutubeAPITask";
 
         @Override
-        protected Boolean doInBackground(URL... urls) {
+        protected Boolean doInBackground(String... urls) {
             boolean succeeded = false;
-            URL url = urls[0];
+            String url = urls[0];
 
             if (url != null) {
                 succeeded = jsonParse(url);
@@ -82,77 +83,90 @@ public class PlaylistDownloaderService extends Service {
         }
 
 
-        private boolean jsonParse(URL apiUrl) {
+        private boolean jsonParse(String strUrl) {
             boolean succeeded = true;
+            boolean lastPage = true;
+            String nextPageToken = null;
+            URL apiUrl;
 
-            ApiConnectionHelper apiConnectionHelper = new ApiConnectionHelper();
+            do {
 
-            JSONObject jsonObject = ApiConnectionHelper.getJsonResponse(apiUrl);
-
-            if (jsonObject != null) {
                 try {
 
-                    String nextPageToken;
-                    try {
-                        nextPageToken = jsonObject.getString("nextPageToken");
-                    } catch (JSONException e) {
-                        nextPageToken = null;
+                    if (nextPageToken != null) {
+                        String tmpUrl = strUrl + "&pageToken=" + nextPageToken;
+                        apiUrl = new URL(tmpUrl);
+                    } else {
+                        apiUrl = new URL(strUrl);
                     }
-
-                    JSONArray items = null;
-                    items = jsonObject.getJSONArray("items");
-
-                    for (int i = 0; i < items.length(); i++) {
-                        JSONObject item = items.getJSONObject(i);
-
-                        JSONObject snippet = item.getJSONObject("snippet");
-
-                        String title = snippet.getString("title");
-                        String description = snippet.getString("description");
-                        String publishedAt = snippet.getString("publishedAt");
-//                        SimpleDateFormat publishedAtDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-//                        Date publishedAt = null;
-//                        try {
-//                            publishedAt = (Date) publishedAtDate.parse(publishedAtStr);
-//                        } catch (ParseException e) {
-//                            Log.e(DEBUG_TAG, "Date ParseException", e);
-//                        }
-
-                        String playlistId = snippet.getString("playlistId");
-                        String position = snippet.getString("position");
-
-                        JSONObject thumbnails = snippet.getJSONObject("thumbnails");
-                        JSONObject thumbnail = thumbnails.getJSONObject("medium");
-
-                        String thumbnailUrl = thumbnail.getString("url");
-
-                        JSONObject resourceId = snippet.getJSONObject("resourceId");
-
-                        String videoId = resourceId.getString("videoId");
-                        Log.d(DEBUG_TAG, "videoId " + videoId);
-
-                        ContentValues videoData = new ContentValues();
-
-                        videoData.put(YoutubeDatabase.COL_TITLE, title);
-                        videoData.put(YoutubeDatabase.COL_DESCRIPTION, description);
-                        videoData.put(YoutubeDatabase.COL_PLAYLIST_ID, playlistId);
-                        videoData.put(YoutubeDatabase.COL_VIDEO_ID, videoId);
-                        videoData.put(YoutubeDatabase.COL_THUMBNAIL_URL, thumbnailUrl);
-                        videoData.put(YoutubeDatabase.COL_PUBLISHED_AT, publishedAt);
-                        videoData.put(YoutubeDatabase.COL_POSITION, Integer.valueOf(position));
-
-                        Uri content_uri = Uri.withAppendedPath(YoutubeProvider.VIDEOS_CONTENT_URI, playlistId);
-                        Log.d(DEBUG_TAG, "content_uri: " + content_uri);
-
-                        getContentResolver().insert(content_uri, videoData);
-                    }
-
-                } catch (JSONException e) {
-                    Log.e(DEBUG_TAG, "JSONException", e);
-                    succeeded = false;
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                    break;
                 }
 
-            }
+                JSONObject jsonObject = ApiConnectionHelper.getJsonResponse(apiUrl);
+
+                if (jsonObject != null) {
+                    try {
+
+                        try {
+                            nextPageToken = jsonObject.getString("nextPageToken");
+                            lastPage = false;
+                        } catch (JSONException e) {
+                            nextPageToken = null;
+                            lastPage = true;
+                        }
+
+                        JSONArray items = null;
+                        items = jsonObject.getJSONArray("items");
+
+                        for (int i = 0; i < items.length(); i++) {
+                            JSONObject item = items.getJSONObject(i);
+
+                            JSONObject snippet = item.getJSONObject("snippet");
+
+                            String title = snippet.getString("title");
+                            String description = snippet.getString("description");
+                            String publishedAt = snippet.getString("publishedAt");
+
+                            String playlistId = snippet.getString("playlistId");
+                            String position = snippet.getString("position");
+
+                            JSONObject thumbnails = snippet.getJSONObject("thumbnails");
+                            JSONObject thumbnail = thumbnails.getJSONObject("medium");
+
+                            String thumbnailUrl = thumbnail.getString("url");
+
+                            JSONObject resourceId = snippet.getJSONObject("resourceId");
+
+                            String videoId = resourceId.getString("videoId");
+                            Log.d(DEBUG_TAG, "videoId " + videoId);
+
+                            ContentValues videoData = new ContentValues();
+
+                            videoData.put(YoutubeDatabase.COL_TITLE, title);
+                            videoData.put(YoutubeDatabase.COL_DESCRIPTION, description);
+                            videoData.put(YoutubeDatabase.COL_PLAYLIST_ID, playlistId);
+                            videoData.put(YoutubeDatabase.COL_VIDEO_ID, videoId);
+                            videoData.put(YoutubeDatabase.COL_THUMBNAIL_URL, thumbnailUrl);
+                            videoData.put(YoutubeDatabase.COL_PUBLISHED_AT, publishedAt);
+                            videoData.put(YoutubeDatabase.COL_POSITION, Integer.valueOf(position));
+
+                            Uri content_uri = Uri.withAppendedPath(YoutubeProvider.VIDEOS_CONTENT_URI, playlistId);
+                            Log.d(DEBUG_TAG, "content_uri: " + content_uri);
+
+                            getContentResolver().insert(content_uri, videoData);
+
+                        }
+
+                    } catch (JSONException e) {
+                        Log.e(DEBUG_TAG, "JSONException", e);
+                        succeeded = false;
+                    }
+
+                }
+            } while (!lastPage);
+
             return succeeded;
         }
     }
