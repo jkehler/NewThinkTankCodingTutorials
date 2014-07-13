@@ -27,7 +27,6 @@ import java.util.List;
 
 public class PlaylistsActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
 
-    YoutubeAPI ytApi;
     GridView playlistsGridView;
     public static final String PLAYLIST_ID_MESSAGE = "curPlaylistId";
     public static final String PLAYLIST_TITLE_MESSAGE = "curPlaylistTitle";

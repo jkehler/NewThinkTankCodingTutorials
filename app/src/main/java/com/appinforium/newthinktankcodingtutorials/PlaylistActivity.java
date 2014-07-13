@@ -3,6 +3,7 @@ package com.appinforium.newthinktankcodingtutorials;
 import android.support.v4.app.FragmentManager;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,10 +18,8 @@ import java.util.List;
 
 public class PlaylistActivity extends ActionBarActivity {
 
-    YoutubeAPI ytApi;
     String playlistId;
     String playlistTitle;
-    List<YoutubeAPI.YoutubeItem> videoItems;
     FragmentManager fragmentManager;
     VideoListFragment videoListFragment;
 
@@ -31,7 +30,8 @@ public class PlaylistActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist);
 
-        ytApi = new YoutubeAPI(DeveloperKey.DEVELOPER_KEY);
+        ActionBar actionBar = getSupportActionBar();
+
 
         Intent intent = this.getIntent();
         playlistTitle = intent.getStringExtra(PlaylistsActivity.PLAYLIST_TITLE_MESSAGE);
@@ -63,39 +63,15 @@ public class PlaylistActivity extends ActionBarActivity {
         if (id == R.id.action_settings) {
             return true;
         }
+        if (id == R.id.action_refresh) {
+            Intent intent = new Intent(getApplicationContext(), PlaylistDownloaderService.class);
+            Log.d(DEBUG_TAG, "refreshClicked - playlist_id: " + playlistId);
+            intent.putExtra("playlist_id", playlistId);
+            startService(intent);
+
+        }
         return super.onOptionsItemSelected(item);
     }
 
-    public void refreshClicked(View view) {
-        Intent intent = new Intent(getApplicationContext(), PlaylistDownloaderService.class);
-        Log.d(DEBUG_TAG, "refreshClicked - playlist_id: " + playlistId);
-        intent.putExtra("playlist_id", playlistId);
-        startService(intent);
 
-    }
-
-    private class GetVideos extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            videoItems = ytApi.getPlaylistItems(playlistId, 50);
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-//            for (int i = 0; i < videoItems.size(); i++) {
-//                Log.d("videoId", videoItems.get(i).videoId);
-//            }
-
-            //videoListFragment.updateVideoList(videoItems);
-
-//            playlistsAdapter.setData(response);
-//            playlistsAdapter.notifyDataSetChanged();
-//            new ThumbnailLoaderTask(playlistsAdapter).execute(response);
-
-        }
-    }
 }

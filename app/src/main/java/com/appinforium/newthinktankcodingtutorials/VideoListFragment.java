@@ -62,7 +62,9 @@ public class VideoListFragment extends Fragment {
         // Inflate the layout for this fragment
         View viewHierarchy = inflater.inflate(R.layout.fragment_video_list, container, false);
 
-        String[] projection = { YoutubeDatabase.ID, YoutubeDatabase.COL_VIDEO_ID, YoutubeDatabase.COL_TITLE, YoutubeDatabase.COL_THUMBNAIL_BITMAP };
+        String[] projection = { YoutubeDatabase.ID, YoutubeDatabase.COL_VIDEO_ID,
+                YoutubeDatabase.COL_TITLE, YoutubeDatabase.COL_THUMBNAIL_BITMAP,
+                YoutubeDatabase.COL_DESCRIPTION };
 
         Log.d(DEBUG_TAG, "intent videoId: " + getActivity().getIntent().getStringExtra(PlaylistsActivity.PLAYLIST_ID_MESSAGE));
 

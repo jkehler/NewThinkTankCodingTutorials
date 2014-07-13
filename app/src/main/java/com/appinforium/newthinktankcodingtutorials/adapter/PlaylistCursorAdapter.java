@@ -35,8 +35,8 @@ public class PlaylistCursorAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        TextView testTextView = (TextView) view.findViewById(R.id.testTextView);
-        testTextView.setText(cursor.getString(cursor.getColumnIndex(YoutubeDatabase.COL_TITLE)));
+        TextView titleTextView = (TextView) view.findViewById(R.id.videoTitleTextView);
+        titleTextView.setText(cursor.getString(cursor.getColumnIndex(YoutubeDatabase.COL_TITLE)));
 
         ImageView thumbnailImageView = (ImageView) view.findViewById(R.id.videoThumbnailImageView);
         byte[] thumbnailBytes = cursor.getBlob(cursor.getColumnIndex(YoutubeDatabase.COL_THUMBNAIL_BITMAP));
