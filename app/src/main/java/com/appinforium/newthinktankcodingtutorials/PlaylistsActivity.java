@@ -18,6 +18,7 @@ import android.widget.SimpleCursorAdapter;
 import com.appinforium.newthinktankcodingtutorials.adapter.PlaylistsCursorAdapter;
 import com.appinforium.newthinktankcodingtutorials.data.YoutubeDatabase;
 import com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider;
+import com.appinforium.newthinktankcodingtutorials.service.PlaylistsDownloaderService;
 
 import java.util.List;
 
@@ -71,6 +72,13 @@ public class PlaylistsActivity extends ActionBarActivity implements AdapterView.
                 projection, null, null, null);
 
         PlaylistsCursorAdapter adapter = new PlaylistsCursorAdapter(getApplicationContext(), playlistsCursor, true);
+
+        Log.d(DEBUG_TAG, "onCreate");
+
+        Intent intent = new Intent(getApplicationContext(), PlaylistsDownloaderService.class);
+        intent.putExtra("channel_id", getResources().getString(R.string.channel_id));
+        startService(intent);
+
 //        CursorAdapter adapter = new SimpleCursorAdapter(getApplicationContext(),
 //                R.layout.playlists_grid_item, playlistsCursor, uiBindFrom, uiBindTo);
 

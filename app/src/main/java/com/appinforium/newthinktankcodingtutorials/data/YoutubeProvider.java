@@ -104,6 +104,11 @@ public class YoutubeProvider extends ContentProvider {
                 queryBuilder.appendWhere(YoutubeDatabase.COL_PLAYLIST_ID + " = '"
                         + uri.getLastPathSegment() + "'");
                 break;
+            case GET_NULL_PLAYLIST_THUMBNAILS:
+                queryBuilder.setTables(YoutubeDatabase.TABLE_PLAYLISTS);
+                queryBuilder.appendWhere(YoutubeDatabase.COL_THUMBNAIL_BITMAP + " is null and ");
+                queryBuilder.appendWhere(YoutubeDatabase.COL_THUMBNAIL_URL + " is not null");
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI");
         }
@@ -135,8 +140,23 @@ public class YoutubeProvider extends ContentProvider {
                             null, contentValues);
                     if (newID > 0) {
                         Uri newUri = ContentUris.withAppendedId(uri, newID);
-                        //Log.d(DEBUG_TAG, "notifyChange uri: " + uri);
-                        //Log.d(DEBUG_TAG, "notifyChange newUri: " + newUri);
+                        getContext().getContentResolver().notifyChange(newUri, null);
+                        return newUri;
+                    } else {
+                        throw new SQLException("Failed to insert row into " + uri);
+                    }
+                } catch (SQLiteConstraintException e) {
+                    Log.i(DEBUG_TAG, "Ignoring constraint failure.");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case GET_PLAYLISTS:
+                try {
+                    long newID = db.insertOrThrow(YoutubeDatabase.TABLE_PLAYLISTS,
+                            null, contentValues);
+                    if (newID > 0) {
+                        Uri newUri = ContentUris.withAppendedId(uri, newID);
                         getContext().getContentResolver().notifyChange(newUri, null);
                         return newUri;
                     } else {
@@ -170,11 +190,13 @@ public class YoutubeProvider extends ContentProvider {
 
         Log.d(DEBUG_TAG, "update uri: " + uri);
         int rowsAffected = 0;
+        String id;
+        StringBuilder modSelection;
 
         switch (uriType) {
             case GET_PLAYLIST_VIDEO_ID:
-                String id = uri.getLastPathSegment();
-                StringBuilder modSelection = new StringBuilder(YoutubeDatabase.ID + "=" + id);
+                id = uri.getLastPathSegment();
+                modSelection = new StringBuilder(YoutubeDatabase.ID + "=" + id);
 
                 if (!TextUtils.isEmpty(selection)) {
                     modSelection.append(" AND " + selection);
@@ -183,7 +205,18 @@ public class YoutubeProvider extends ContentProvider {
                 rowsAffected = db.update(YoutubeDatabase.TABLE_VIDEOS,
                         contentValues, modSelection.toString(), selectionArgs);
 
-                Log.d(DEBUG_TAG, "rowsAffected: " + String.valueOf(rowsAffected));
+                break;
+            case GET_PLAYLIST_ID:
+                id = uri.getLastPathSegment();
+                modSelection = new StringBuilder(YoutubeDatabase.ID + "=" + id);
+
+                if (!TextUtils.isEmpty(selection)) {
+                    modSelection.append(" AND " + selection);
+                }
+
+                rowsAffected = db.update(YoutubeDatabase.TABLE_PLAYLISTS,
+                        contentValues, modSelection.toString(), selectionArgs);
+
                 break;
         }
 

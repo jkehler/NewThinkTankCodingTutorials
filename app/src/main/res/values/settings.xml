@@ -2,4 +2,27 @@
 <resources>
     <string name="youtube_api_key">AIzaSyBKxc5WPDEzJ79m-_v_kvqBeZfdQ1kncFA</string>
     <string name="api_max_results">50</string>
+    <string name="channel_id">UCwRXb5dUK4cvsHbx-rGzSgw</string>
+    <string-array name="allowed_playlist_ids">
+        <item>PLGLfVvz_LVvSPjWpLPFEfOCbezi6vATIh</item>
+        <item>PLGLfVvz_LVvQHO1PfyscjIPkNJjgHsLyH</item>
+        <item>PLGLfVvz_LVvSpUc78P7PBfLlrQEEth0lm</item>
+        <item>PLGLfVvz_LVvSKgnFm8-6Fz1cd6zt_KxTC</item>
+        <item>PLGLfVvz_LVvTSi9bKrvGR2_DBg0Tv8Dxo</item>
+        <item>PLGLfVvz_LVvSaXCpKS395wbCcmsmgRea7</item>
+        <item>PLGLfVvz_LVvQUjiCc8lUT9aO0GsWA4uNe</item>
+        <item>PLGLfVvz_LVvReUrWr94U-ZMgjYTQ538nT</item>
+        <item>PLGLfVvz_LVvT59FVZJeJtVUr3h7PluW6Q</item>
+        <item>PLGLfVvz_LVvSuz6NuHAzpM52qKM6bPlCV</item>
+        <item>PLGLfVvz_LVvS5P7khyR4xDp7T9lCk9PgE</item>
+        <item>PLGLfVvz_LVvQ5G-LdJ8RLqe-ndo7QITYc</item>
+        <item>PLF206E906175C7E07</item>
+        <item>PLBB413675AFBDC1F4</item>
+        <item>PLE7E8B7F4856C9B19</item>
+        <item>PL82EBDA7BEB6BD571</item>
+        <item>PL3877C5434C042349</item>
+        <item>PLBA965A22D89CF13B</item>
+        <item>PL07454EA7FF8D28AB</item>
+        <item>PL2407F4EE0530B251</item>
+    </string-array>
 </resources>

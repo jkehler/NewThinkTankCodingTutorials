@@ -29,16 +29,23 @@ public class ThumbnailDownloaderService extends Service {
 
     private static final String DEBUG_TAG = "ThumbnailDownloaderService";
     private String playlistId;
+    private String channelId;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        playlistId = intent.getStringExtra("playlist_id");
+        try {
+            playlistId = intent.getStringExtra("playlist_id");
+            channelId = intent.getStringExtra("channel_id");
 
-        ImageDownloaderTask task = new ImageDownloaderTask();
-        task.execute();
+            ImageDownloaderTask task = new ImageDownloaderTask();
+            task.execute();
 
-        return Service.START_FLAG_REDELIVERY;
+            return Service.START_FLAG_REDELIVERY;
+        } catch (NullPointerException e) {
+            Log.e(DEBUG_TAG, "NullPointerException", e);
+        }
+        return 0;
     }
 
     @Override
@@ -53,8 +60,15 @@ public class ThumbnailDownloaderService extends Service {
         @Override
         protected Boolean doInBackground(Void... items) {
 
+            Uri content_uri = null;
+
             if (playlistId != null) {
-                Uri content_uri = Uri.withAppendedPath(YoutubeProvider.THUMBNAILS_CONTENT_URI, playlistId);
+                content_uri = Uri.withAppendedPath(YoutubeProvider.THUMBNAILS_CONTENT_URI, playlistId);
+            }
+            if (channelId != null) {
+                content_uri = YoutubeProvider.THUMBNAILS_CONTENT_URI;
+            }
+            if (content_uri != null) {
                 Log.d(DEBUG_TAG, "content_uri: " + String.valueOf(content_uri));
 
                 String[] projection = {YoutubeDatabase.ID, YoutubeDatabase.COL_THUMBNAIL_URL};
@@ -75,8 +89,16 @@ public class ThumbnailDownloaderService extends Service {
                         byte[] thumbnail = baos.toByteArray();
                         values.put(YoutubeDatabase.COL_THUMBNAIL_BITMAP, thumbnail);
 
-                        Uri update_content_uri = Uri.withAppendedPath(YoutubeProvider.VIDEOS_CONTENT_URI, playlistId + "/" + id);
-                        getContentResolver().update(update_content_uri, values, null, null);
+                        Uri update_content_uri = null;
+                        if (playlistId != null) {
+                            update_content_uri = Uri.withAppendedPath(YoutubeProvider.VIDEOS_CONTENT_URI, playlistId + "/" + id);
+                        }
+                        if (channelId != null) {
+                            update_content_uri = Uri.withAppendedPath(YoutubeProvider.PLAYLISTS_CONTENT_URI, String.valueOf(id));
+                        }
+                        if (update_content_uri != null) {
+                            getContentResolver().update(update_content_uri, values, null, null);
+                        }
                     }
                 }
             }

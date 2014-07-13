@@ -34,6 +34,8 @@ public class YoutubeDatabase extends SQLiteOpenHelper {
             + " (" + ID + " integer primary key autoincrement, "
             + COL_TITLE + " text not null, "
             + COL_PLAYLIST_ID + " text UNIQUE not null, "
+            + COL_DESCRIPTION + " text, "
+            + COL_PUBLISHED_AT + " datetime not null, "
             + COL_THUMBNAIL_URL + " text, "
             + COL_THUMBNAIL_BITMAP + " blob);";
 
@@ -57,7 +59,7 @@ public class YoutubeDatabase extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_PLAYLISTS);
         db.execSQL(CREATE_TABLE_VIDEOS);
         Log.d(DEBUG_TAG, "onCreate called");
-        seedPlaylistData(db);
+//        seedPlaylistData(db);
     }
 
     @Override

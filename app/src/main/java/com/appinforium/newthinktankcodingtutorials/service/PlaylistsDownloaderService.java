@@ -28,34 +28,29 @@ import java.text.SimpleDateFormat;
  * Created by jeff on 7/11/14.
  */
 
-public class PlaylistDownloaderService extends Service {
+public class PlaylistsDownloaderService extends Service {
 
-    private static final String DEBUG_TAG = "PlaylistDownloaderService";
-    String playlistId;
+    private static final String DEBUG_TAG = "PlaylistsDownloaderService";
+    String channelId;
     String strUrl;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         try {
-            playlistId = intent.getStringExtra("playlist_id");
+            channelId = intent.getStringExtra("channel_id");
 
             strUrl = String.format(
-                    "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=%s&playlistId=%s&key=%s",
+                    "https://www.googleapis.com/youtube/v3/playlists?part=snippet&maxResults=%s&channelId=%s&key=%s",
                     getResources().getString(R.string.api_max_results),
-                    playlistId, getResources().getString(R.string.youtube_api_key));
+                    channelId, getResources().getString(R.string.youtube_api_key));
 
-            //try {
-            //    URL apiUrl = new URL(strUrl);
             YoutubeAPITask youtubeAPITask = new YoutubeAPITask();
             youtubeAPITask.execute(strUrl);
-//        } catch (MalformedURLException e) {
-//            Log.e(DEBUG_TAG, "Malformed URL: " + strUrl);
-//        }
 
             return Service.START_FLAG_REDELIVERY;
         } catch (NullPointerException e) {
-            Log.d(DEBUG_TAG, "NullPointerException", e);
+            Log.e(DEBUG_TAG, "NullPointerException", e);
         }
 
         return 0;
@@ -84,7 +79,7 @@ public class PlaylistDownloaderService extends Service {
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             Intent thumbnailIntent = new Intent(getApplicationContext(), ThumbnailDownloaderService.class);
-            thumbnailIntent.putExtra("playlist_id", playlistId);
+            thumbnailIntent.putExtra("channel_id", channelId);
             startService(thumbnailIntent);
         }
 
@@ -94,6 +89,9 @@ public class PlaylistDownloaderService extends Service {
             boolean lastPage = true;
             String nextPageToken = null;
             URL apiUrl;
+
+            String[] allowed_playlist_ids = getResources().getStringArray(R.array.allowed_playlist_ids);
+
 
             do {
 
@@ -129,39 +127,40 @@ public class PlaylistDownloaderService extends Service {
                         for (int i = 0; i < items.length(); i++) {
                             JSONObject item = items.getJSONObject(i);
 
+                            String playlistId = item.getString("id");
+
+
+
                             JSONObject snippet = item.getJSONObject("snippet");
 
                             String title = snippet.getString("title");
                             String description = snippet.getString("description");
                             String publishedAt = snippet.getString("publishedAt");
 
-                            String playlistId = snippet.getString("playlistId");
-                            String position = snippet.getString("position");
-
                             JSONObject thumbnails = snippet.getJSONObject("thumbnails");
                             JSONObject thumbnail = thumbnails.getJSONObject("medium");
 
                             String thumbnailUrl = thumbnail.getString("url");
 
-                            JSONObject resourceId = snippet.getJSONObject("resourceId");
+                            ContentValues contentValues = new ContentValues();
 
-                            String videoId = resourceId.getString("videoId");
-                            Log.d(DEBUG_TAG, "videoId " + videoId);
+                            contentValues.put(YoutubeDatabase.COL_TITLE, title);
+                            contentValues.put(YoutubeDatabase.COL_DESCRIPTION, description);
+                            contentValues.put(YoutubeDatabase.COL_PLAYLIST_ID, playlistId);
+                            contentValues.put(YoutubeDatabase.COL_THUMBNAIL_URL, thumbnailUrl);
+                            contentValues.put(YoutubeDatabase.COL_PUBLISHED_AT, publishedAt);
 
-                            ContentValues videoData = new ContentValues();
+                            for (String playlist_id : allowed_playlist_ids) {
+                                if (playlist_id.equals(playlistId)) {
+                                    Log.d(DEBUG_TAG, "allowed playlist_id: " + playlistId);
+                                    getContentResolver().insert(YoutubeProvider.PLAYLISTS_CONTENT_URI,
+                                            contentValues);
+                                }
+                            }
+//                            Uri content_uri = Uri.withAppendedPath(YoutubeProvider.PLAYLISTS_CONTENT_URI, playlistId);
+//                            Log.d(DEBUG_TAG, "content_uri: " + content_uri);
 
-                            videoData.put(YoutubeDatabase.COL_TITLE, title);
-                            videoData.put(YoutubeDatabase.COL_DESCRIPTION, description);
-                            videoData.put(YoutubeDatabase.COL_PLAYLIST_ID, playlistId);
-                            videoData.put(YoutubeDatabase.COL_VIDEO_ID, videoId);
-                            videoData.put(YoutubeDatabase.COL_THUMBNAIL_URL, thumbnailUrl);
-                            videoData.put(YoutubeDatabase.COL_PUBLISHED_AT, publishedAt);
-                            videoData.put(YoutubeDatabase.COL_POSITION, Integer.valueOf(position));
-
-                            Uri content_uri = Uri.withAppendedPath(YoutubeProvider.VIDEOS_CONTENT_URI, playlistId);
-                            Log.d(DEBUG_TAG, "content_uri: " + content_uri);
-
-                            getContentResolver().insert(content_uri, videoData);
+//                            getContentResolver().insert(YoutubeProvider.PLAYLISTS_CONTENT_URI, contentValues);
 
                         }
 
