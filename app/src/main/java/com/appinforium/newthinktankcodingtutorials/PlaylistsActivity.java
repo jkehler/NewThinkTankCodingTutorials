@@ -2,8 +2,10 @@ package com.appinforium.newthinktankcodingtutorials;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,7 +28,6 @@ import java.util.List;
 public class PlaylistsActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
 
     YoutubeAPI ytApi;
-    PlaylistsAdapter playlistsAdapter;
     GridView playlistsGridView;
     public static final String PLAYLIST_ID_MESSAGE = "curPlaylistId";
     public static final String PLAYLIST_TITLE_MESSAGE = "curPlaylistTitle";
@@ -119,24 +120,4 @@ public class PlaylistsActivity extends ActionBarActivity implements AdapterView.
     }
 
 
-    private class GetPlaylists extends AsyncTask<Void, Void, Void> {
-
-        List<YoutubeAPI.YoutubeItem> response;
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            response = ytApi.getChannelPlaylists("UCwRXb5dUK4cvsHbx-rGzSgw", 50);
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            playlistsAdapter.setData(response);
-            playlistsAdapter.notifyDataSetChanged();
-            new ThumbnailLoaderTask(playlistsAdapter).execute(response);
-
-        }
-    }
 }
