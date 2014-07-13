@@ -30,8 +30,6 @@ public class PlaylistActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist);
 
-        ActionBar actionBar = getSupportActionBar();
-
 
         Intent intent = this.getIntent();
         playlistTitle = intent.getStringExtra(PlaylistsActivity.PLAYLIST_TITLE_MESSAGE);
@@ -41,9 +39,6 @@ public class PlaylistActivity extends ActionBarActivity {
         fragmentManager = getSupportFragmentManager();
         videoListFragment = (VideoListFragment) fragmentManager.findFragmentById(R.id.fragmentVideoList);
 
-
-//        GetVideos getVideos = new GetVideos();
-//        getVideos.execute();
     }
 
 

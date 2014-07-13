@@ -1,0 +1,28 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:paddingTop="0dp"
+    android:paddingBottom="0dp"
+    tools:context="com.appinforium.newthinktankcodingtutorials.PlaylistActivity">
+
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:name="com.appinforium.newthinktankcodingtutorials.VideoListFragment"
+        android:id="@+id/fragmentVideoList"
+        tools:layout="@layout/fragment_video_list" />
+
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:name="com.appinforium.newthinktankcodingtutorials.VideoDetailFragment"
+        android:id="@+id/fragmentVideoDetail"
+        tools:layout="@layout/fragment_video_detail" />
+
+</LinearLayout>
