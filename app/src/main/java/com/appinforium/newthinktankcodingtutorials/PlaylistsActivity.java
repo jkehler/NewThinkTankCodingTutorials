@@ -2,10 +2,7 @@ package com.appinforium.newthinktankcodingtutorials;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,16 +10,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.CursorAdapter;
 import android.widget.GridView;
-import android.widget.SimpleCursorAdapter;
 
 import com.appinforium.newthinktankcodingtutorials.adapter.PlaylistsCursorAdapter;
 import com.appinforium.newthinktankcodingtutorials.data.YoutubeDatabase;
 import com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider;
 import com.appinforium.newthinktankcodingtutorials.service.PlaylistsDownloaderService;
 
-import java.util.List;
 
 
 public class PlaylistsActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
@@ -53,12 +47,6 @@ public class PlaylistsActivity extends ActionBarActivity implements AdapterView.
 
             cursor.close();
         }
-//        PlaylistsAdapter.ViewItem item = (PlaylistsAdapter.ViewItem) adapterView.getItemAtPosition(i);
-//        Log.d("playlistId", item.playlistId);
-//        Intent intent = new Intent(this, PlaylistActivity.class);
-//        intent.putExtra(PLAYLIST_ID_MESSAGE, item.playlistId);
-//        intent.putExtra(PLAYLIST_TITLE_MESSAGE, item.title);
-//        startActivity(intent);
     }
 
     @Override
@@ -79,22 +67,9 @@ public class PlaylistsActivity extends ActionBarActivity implements AdapterView.
         intent.putExtra("channel_id", getResources().getString(R.string.channel_id));
         startService(intent);
 
-//        CursorAdapter adapter = new SimpleCursorAdapter(getApplicationContext(),
-//                R.layout.playlists_grid_item, playlistsCursor, uiBindFrom, uiBindTo);
-
-
-//        ytApi = new YoutubeAPI(DeveloperKey.DEVELOPER_KEY);
-//
         playlistsGridView = (GridView) findViewById(R.id.playlistsGridView);
         playlistsGridView.setAdapter(adapter);
         playlistsGridView.setOnItemClickListener(this);
-
-//        playlistsAdapter = new PlaylistsAdapter(this);
-//        playlistsGridView.setAdapter(playlistsAdapter);
-//        playlistsGridView.setOnItemClickListener(this);
-//
-//        GetPlaylists getPlaylists = new GetPlaylists();
-//        getPlaylists.execute();
 
     }
 
