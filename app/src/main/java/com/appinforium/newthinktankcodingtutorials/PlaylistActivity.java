@@ -16,7 +16,7 @@ import com.appinforium.newthinktankcodingtutorials.service.ThumbnailDownloaderSe
 
 import java.util.List;
 
-public class PlaylistActivity extends ActionBarActivity {
+public class PlaylistActivity extends ActionBarActivity implements VideoListFragment.OnVideoSelectedListener {
 
     String playlistId;
     String playlistTitle;
@@ -69,4 +69,8 @@ public class PlaylistActivity extends ActionBarActivity {
     }
 
 
+    @Override
+    public void onVideoSelected(long id) {
+        Log.d(DEBUG_TAG, "Received id: " + id);
+    }
 }
