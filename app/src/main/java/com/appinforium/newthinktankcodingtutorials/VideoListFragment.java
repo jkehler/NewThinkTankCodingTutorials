@@ -16,6 +16,7 @@ import com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider;
 public class VideoListFragment extends ListFragment {
 
     private static final String DEBUG_TAG = "VideoListFragment";
+    String playlistId;
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
@@ -29,20 +30,33 @@ public class VideoListFragment extends ListFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         String[] projection = { YoutubeDatabase.ID, YoutubeDatabase.COL_VIDEO_ID,
-                YoutubeDatabase.COL_TITLE, YoutubeDatabase.COL_THUMBNAIL_BITMAP,
-                YoutubeDatabase.COL_DESCRIPTION };
+                YoutubeDatabase.COL_TITLE, YoutubeDatabase.COL_THUMBNAIL_URL };
 
         Log.d(DEBUG_TAG, "playlistId: " + getActivity().getIntent().getStringExtra(PlaylistsActivity.PLAYLIST_ID_MESSAGE));
 
+//        if (savedInstanceState != null) {
+//            playlistId = savedInstanceState.getString("playlistId");
+//            Log.d(DEBUG_TAG, "restoring playlistId from savedInstanceState");
+//        } else {
+        playlistId = getActivity().getIntent().getStringExtra(PlaylistsActivity.PLAYLIST_ID_MESSAGE);
+//        }
+
         Uri content_uri = Uri.withAppendedPath(
                 YoutubeProvider.VIDEOS_CONTENT_URI,
-                getActivity().getIntent().getStringExtra(PlaylistsActivity.PLAYLIST_ID_MESSAGE)
+                playlistId
         );
 
         Cursor cursor = getActivity().getContentResolver().query(content_uri, projection, null, null, null);
 
         PlaylistCursorAdapter adapter = new PlaylistCursorAdapter(getActivity(), cursor, true);
         setListAdapter(adapter);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        Log.d(DEBUG_TAG, "onSaveInstanceState called");
     }
 
     public interface OnVideoSelectedListener {

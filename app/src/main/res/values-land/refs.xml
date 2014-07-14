@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="layout" name="activity_playlist">
+        @layout/activity_playlist_wide
+    </item>
+</resources>

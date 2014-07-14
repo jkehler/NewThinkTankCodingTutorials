@@ -13,7 +13,6 @@
         <activity
 
             android:name=".PlaylistsActivity"
-            android:configChanges="orientation|screenSize"
             android:label="@string/app_name" >
 
             <intent-filter>
@@ -24,11 +23,17 @@
         </activity>
         <activity
             android:name=".PlaylistActivity"
-            android:label="@string/title_activity_playlist"
-            android:parentActivityName=".PlaylistsActivity" >
+            android:label="@string/title_activity_playlist" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.appinforium.newthinktankcodingtutorials.PlaylistsActivity" />
+        </activity>
+        <activity
+            android:name=".VideoDetailActivity"
+            android:label="Video Details">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.appinforium.newthinktankcodingtutorials.PlaylistActivity" />
         </activity>
 
         <provider

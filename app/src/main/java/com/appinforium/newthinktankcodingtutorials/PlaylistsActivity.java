@@ -54,7 +54,8 @@ public class PlaylistsActivity extends ActionBarActivity implements AdapterView.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlists);
 
-        String[] projection = { YoutubeDatabase.ID, YoutubeDatabase.COL_TITLE, YoutubeDatabase.COL_THUMBNAIL_BITMAP };
+        String[] projection = { YoutubeDatabase.ID, YoutubeDatabase.COL_TITLE, YoutubeDatabase.COL_THUMBNAIL_BITMAP,
+                                YoutubeDatabase.COL_THUMBNAIL_URL};
 
         Cursor playlistsCursor = getContentResolver().query(YoutubeProvider.PLAYLISTS_CONTENT_URI,
                 projection, null, null, null);

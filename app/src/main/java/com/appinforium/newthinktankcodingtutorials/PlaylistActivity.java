@@ -23,6 +23,9 @@ public class PlaylistActivity extends ActionBarActivity implements VideoListFrag
     FragmentManager fragmentManager;
     VideoListFragment videoListFragment;
 
+    private final static String PLAYLIST_ID = "PLAYLIST_ID";
+    private final static String PLAYLIST_TITLE = "PLAYLIST_TITLE";
+
     private static final String DEBUG_TAG = "PlaylistActivity";
 
     @Override
@@ -31,14 +34,31 @@ public class PlaylistActivity extends ActionBarActivity implements VideoListFrag
         setContentView(R.layout.activity_playlist);
 
 
-        Intent intent = this.getIntent();
-        playlistTitle = intent.getStringExtra(PlaylistsActivity.PLAYLIST_TITLE_MESSAGE);
-        playlistId = intent.getStringExtra(PlaylistsActivity.PLAYLIST_ID_MESSAGE);
+        if (savedInstanceState == null) {
+            Intent intent = this.getIntent();
+            playlistTitle = intent.getStringExtra(PlaylistsActivity.PLAYLIST_TITLE_MESSAGE);
+            playlistId = intent.getStringExtra(PlaylistsActivity.PLAYLIST_ID_MESSAGE);
+            Log.d(DEBUG_TAG, "savedInstanceState is null");
+        } else {
+            playlistId = savedInstanceState.getString(PLAYLIST_ID);
+            playlistTitle = savedInstanceState.getString(PLAYLIST_TITLE);
+            Log.d(DEBUG_TAG, "restoring from savedInstanceState");
+        }
         this.setTitle(playlistTitle);
 
         fragmentManager = getSupportFragmentManager();
         videoListFragment = (VideoListFragment) fragmentManager.findFragmentById(R.id.fragmentVideoList);
 
+
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(DEBUG_TAG, "saving playlistId and playlistTitle to savedInstanceState");
+        outState.putString(PLAYLIST_ID, playlistId);
+        outState.putString(PLAYLIST_TITLE, playlistTitle);
     }
 
 
@@ -72,5 +92,16 @@ public class PlaylistActivity extends ActionBarActivity implements VideoListFrag
     @Override
     public void onVideoSelected(long id) {
         Log.d(DEBUG_TAG, "Received id: " + id);
+
+        VideoDetailFragment videoDetailFragment = (VideoDetailFragment)
+                fragmentManager.findFragmentById(R.id.fragmentVideoDetail);
+
+        if (videoDetailFragment == null || !videoDetailFragment.isVisible()) {
+            Intent intent = new Intent(this, VideoDetailActivity.class);
+            intent.putExtra(VideoDetailActivity.ITEM_ID_MESSAGE, id);
+            startActivity(intent);
+        } else {
+            videoDetailFragment.setVideo(id);
+        }
     }
 }

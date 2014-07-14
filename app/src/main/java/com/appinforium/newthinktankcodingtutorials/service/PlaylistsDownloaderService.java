@@ -78,9 +78,9 @@ public class PlaylistsDownloaderService extends Service {
 
         @Override
         protected void onPostExecute(Boolean aBoolean) {
-            Intent thumbnailIntent = new Intent(getApplicationContext(), ThumbnailDownloaderService.class);
-            thumbnailIntent.putExtra("channel_id", channelId);
-            startService(thumbnailIntent);
+//            Intent thumbnailIntent = new Intent(getApplicationContext(), ThumbnailDownloaderService.class);
+//            thumbnailIntent.putExtra("channel_id", channelId);
+//            startService(thumbnailIntent);
         }
 
 
