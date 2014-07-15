@@ -4,11 +4,15 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.appinforium.newthinktankcodingtutorials.service.PlaylistUpdaterIntentService;
 
@@ -19,6 +23,7 @@ public class PlaylistActivity extends Activity implements
     private String playlistId;
     private String playlistTitle;
     private boolean isDynamic;
+    private Menu optionsMenu;
 
     private final static String PLAYLIST_ID = "PLAYLIST_ID";
     private final static String PLAYLIST_TITLE = "PLAYLIST_TITLE";
@@ -62,6 +67,12 @@ public class PlaylistActivity extends Activity implements
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(broadcastReceiver, new IntentFilter(PlaylistUpdaterIntentService.NOTIFICATION));
+    }
+
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -71,9 +82,16 @@ public class PlaylistActivity extends Activity implements
         outState.putString(PLAYLIST_TITLE, playlistTitle);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(broadcastReceiver);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        this.optionsMenu = menu;
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.playlist, menu);
         return true;
@@ -89,6 +107,7 @@ public class PlaylistActivity extends Activity implements
             return true;
         }
         if (id == R.id.action_refresh) {
+            setRefreshActionButtonState(true);
             Intent intent = new Intent(getApplicationContext(), PlaylistUpdaterIntentService.class);
             intent.putExtra(PlaylistUpdaterIntentService.PLAYLIST_ID, playlistId);
             startService(intent);
@@ -116,10 +135,11 @@ public class PlaylistActivity extends Activity implements
             args.putLong(VideoDetailFragment.VIDEO_INDEX, id);
             videoDetailFragment.setArguments(args);
 
-            fragmentTransaction.replace(R.id.playlistLayoutRoot, videoDetailFragment, "videoDetail");
-            fragmentTransaction.addToBackStack(null);
             fragmentTransaction.setCustomAnimations(
                     android.R.animator.fade_in, android.R.animator.fade_out);
+            fragmentTransaction.replace(R.id.playlistLayoutRoot, videoDetailFragment, "videoDetail");
+            fragmentTransaction.addToBackStack(null);
+
             fragmentTransaction.commit();
 
         } else {
@@ -131,5 +151,33 @@ public class PlaylistActivity extends Activity implements
 
     }
 
+    public void setRefreshActionButtonState(final boolean refreshing) {
+        if (optionsMenu != null) {
+            final MenuItem refreshItem = optionsMenu
+                    .findItem(R.id.action_refresh);
+            if (refreshItem != null) {
+                if (refreshing) {
+                    refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
+                } else {
+                    refreshItem.setActionView(null);
+                }
+            }
+        }
+    }
 
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                int resultCode = bundle.getInt(PlaylistUpdaterIntentService.RESULT);
+                if (resultCode == RESULT_OK) {
+                    setRefreshActionButtonState(false);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Playlist update failed",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    };
 }

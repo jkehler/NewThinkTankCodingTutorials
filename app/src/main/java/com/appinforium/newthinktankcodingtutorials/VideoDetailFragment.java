@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,6 +75,11 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
 
         if (videoIndex != VIDEO_INDEX_NOT_SET) {
             setVideo(videoIndex);
+        } else {
+            // hide controls
+            videoTitleTextView.setVisibility(View.INVISIBLE);
+            videoDescriptionTextView.setVisibility(View.INVISIBLE);
+            watchVideoButton.setVisibility(View.INVISIBLE);
         }
 
         return viewHierarchy;
@@ -102,6 +108,11 @@ public class VideoDetailFragment extends Fragment implements View.OnClickListene
         } else {
             videoTitleTextView.setText("Error loading details");
         }
+
+
+        videoTitleTextView.setVisibility(View.VISIBLE);
+        videoDescriptionTextView.setVisibility(View.VISIBLE);
+        watchVideoButton.setVisibility(View.VISIBLE);
     }
 
     @Override

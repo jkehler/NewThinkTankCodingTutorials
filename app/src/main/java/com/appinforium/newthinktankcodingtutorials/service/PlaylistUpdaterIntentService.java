@@ -1,5 +1,6 @@
 package com.appinforium.newthinktankcodingtutorials.service;
 
+import android.app.Activity;
 import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -22,6 +23,9 @@ public class PlaylistUpdaterIntentService extends IntentService {
 
     private static final String DEBUG_TAG = "PlaylistUpdaterIntentService";
     public static final String PLAYLIST_ID = "playlist_id_msg";
+    public static final String NOTIFICATION = "com.appinforium.newthinktankcodingtutorials.service";
+    public static final String RESULT = "result";
+    private int result = Activity.RESULT_CANCELED;
 
     public PlaylistUpdaterIntentService() {
         super(DEBUG_TAG);
@@ -40,6 +44,8 @@ public class PlaylistUpdaterIntentService extends IntentService {
 
             if (!processRequest(strUrl)) {
                 Log.e(DEBUG_TAG, "processRequest failed.");
+            } else {
+                publishResult(Activity.RESULT_OK);
             }
         }
     }
@@ -129,5 +135,11 @@ public class PlaylistUpdaterIntentService extends IntentService {
         } while (!lastPage);
 
         return succeeded;
+    }
+
+    private void publishResult(int result) {
+        Intent intent = new Intent(NOTIFICATION);
+        intent.putExtra(RESULT, result);
+        sendBroadcast(intent);
     }
 }
