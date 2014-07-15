@@ -1,9 +1,9 @@
 package com.appinforium.newthinktankcodingtutorials;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -19,7 +19,7 @@ import com.appinforium.newthinktankcodingtutorials.service.PlaylistsDownloaderSe
 
 
 
-public class PlaylistsActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
+public class PlaylistsActivity extends Activity implements AdapterView.OnItemClickListener {
 
     GridView playlistsGridView;
     public static final String PLAYLIST_ID_MESSAGE = "curPlaylistId";

@@ -1,27 +1,24 @@
 package com.appinforium.newthinktankcodingtutorials;
 
-import android.support.v4.app.FragmentManager;
+import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
-import com.appinforium.newthinktankcodingtutorials.service.PlaylistDownloaderService;
-import com.appinforium.newthinktankcodingtutorials.service.ThumbnailDownloaderService;
+import com.appinforium.newthinktankcodingtutorials.service.PlaylistUpdaterIntentService;
 
-import java.util.List;
 
-public class PlaylistActivity extends ActionBarActivity implements VideoListFragment.OnVideoSelectedListener {
+public class PlaylistActivity extends Activity implements
+        VideoListFragment.OnVideoSelectedListener {
 
     String playlistId;
     String playlistTitle;
-    FragmentManager fragmentManager;
-    VideoListFragment videoListFragment;
+    boolean isDynamic;
 
     private final static String PLAYLIST_ID = "PLAYLIST_ID";
     private final static String PLAYLIST_TITLE = "PLAYLIST_TITLE";
@@ -31,24 +28,37 @@ public class PlaylistActivity extends ActionBarActivity implements VideoListFrag
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_playlist);
+        setContentView(R.layout.activity_playlist_dynamic);
 
-
-        if (savedInstanceState == null) {
+        Log.d(DEBUG_TAG, "onCreate called - savedInstanceState: " + savedInstanceState);
+//        if (savedInstanceState == null) {
             Intent intent = this.getIntent();
             playlistTitle = intent.getStringExtra(PlaylistsActivity.PLAYLIST_TITLE_MESSAGE);
             playlistId = intent.getStringExtra(PlaylistsActivity.PLAYLIST_ID_MESSAGE);
-            Log.d(DEBUG_TAG, "savedInstanceState is null");
-        } else {
-            playlistId = savedInstanceState.getString(PLAYLIST_ID);
-            playlistTitle = savedInstanceState.getString(PLAYLIST_TITLE);
-            Log.d(DEBUG_TAG, "restoring from savedInstanceState");
-        }
+//            Log.d(DEBUG_TAG, "savedInstanceState is null");
+//        } else {
+//            playlistId = savedInstanceState.getString(PLAYLIST_ID);
+//            playlistTitle = savedInstanceState.getString(PLAYLIST_TITLE);
+//            Log.d(DEBUG_TAG, "restoring from savedInstanceState");
+//        }
         this.setTitle(playlistTitle);
 
-        fragmentManager = getSupportFragmentManager();
-        videoListFragment = (VideoListFragment) fragmentManager.findFragmentById(R.id.fragmentVideoList);
+        FragmentManager fragmentManager = getFragmentManager();
 
+        // Test if we are in a dynamic layout
+        Fragment videoDetailFragment = fragmentManager.findFragmentById(R.id.fragmentVideoDetail);
+        isDynamic = videoDetailFragment == null || !videoDetailFragment.isInLayout();
+
+        Log.d(DEBUG_TAG, "isDynamic: " + isDynamic);
+
+        // Dynamically load the video List fragment if necessary
+        if (isDynamic && savedInstanceState == null) {
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            VideoListFragment videoListFragment = new VideoListFragment();
+
+            fragmentTransaction.add(R.id.playlistLayoutRoot, videoListFragment, "videoList");
+            fragmentTransaction.commit();
+        }
 
     }
 
@@ -79,9 +89,8 @@ public class PlaylistActivity extends ActionBarActivity implements VideoListFrag
             return true;
         }
         if (id == R.id.action_refresh) {
-            Intent intent = new Intent(getApplicationContext(), PlaylistDownloaderService.class);
-            Log.d(DEBUG_TAG, "refreshClicked - playlist_id: " + playlistId);
-            intent.putExtra("playlist_id", playlistId);
+            Intent intent = new Intent(getApplicationContext(), PlaylistUpdaterIntentService.class);
+            intent.putExtra(PlaylistUpdaterIntentService.PLAYLIST_ID, playlistId);
             startService(intent);
 
         }
@@ -93,15 +102,34 @@ public class PlaylistActivity extends ActionBarActivity implements VideoListFrag
     public void onVideoSelected(long id) {
         Log.d(DEBUG_TAG, "Received id: " + id);
 
-        VideoDetailFragment videoDetailFragment = (VideoDetailFragment)
-                fragmentManager.findFragmentById(R.id.fragmentVideoDetail);
+        VideoDetailFragment videoDetailFragment;
+        FragmentManager fragmentManager = getFragmentManager();
 
-        if (videoDetailFragment == null || !videoDetailFragment.isVisible()) {
-            Intent intent = new Intent(this, VideoDetailActivity.class);
-            intent.putExtra(VideoDetailActivity.ITEM_ID_MESSAGE, id);
-            startActivity(intent);
+
+        if (isDynamic) {
+            // Dynamically swap the videoList fragment with videoDetail
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            videoDetailFragment = new VideoDetailFragment();
+
+            // pass video Index to fragment via args
+            Bundle args = new Bundle();
+            args.putLong(VideoDetailFragment.VIDEO_INDEX, id);
+            videoDetailFragment.setArguments(args);
+
+            fragmentTransaction.replace(R.id.playlistLayoutRoot, videoDetailFragment, "videoDetail");
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.setCustomAnimations(
+                    android.R.animator.fade_in, android.R.animator.fade_out);
+            fragmentTransaction.commit();
+
         } else {
+            // use the already visible videoDetail fragment
+            videoDetailFragment = (VideoDetailFragment)
+                    fragmentManager.findFragmentById(R.id.fragmentVideoDetail);
             videoDetailFragment.setVideo(id);
         }
+
     }
+
+
 }

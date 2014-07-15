@@ -36,6 +36,7 @@ public class YoutubeProvider extends ContentProvider {
     private static final int GET_PLAYLIST_VIDEO_ID = 103;
     private static final int GET_NULL_PLAYLIST_THUMBNAILS = 104;
     private static final int GET_NULL_VIDEO_THUMBNAILS = 105;
+    private static final int GET_VIDEO_ID = 106;
 
     private static final UriMatcher sURIMatcher = new UriMatcher(
             UriMatcher.NO_MATCH);
@@ -52,6 +53,9 @@ public class YoutubeProvider extends ContentProvider {
         // content://com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider/videos/*/#
         sURIMatcher.addURI(AUTHORITY, "videos/*/#", GET_PLAYLIST_VIDEO_ID);
 
+        // content://com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider/video/#
+        sURIMatcher.addURI(AUTHORITY, "video/#", GET_VIDEO_ID);
+
         // content://com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider/null_thumbnails
         sURIMatcher.addURI(AUTHORITY, "null_thumbnails", GET_NULL_PLAYLIST_THUMBNAILS);
 
@@ -62,6 +66,7 @@ public class YoutubeProvider extends ContentProvider {
 
     public static final Uri PLAYLISTS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/playlists");
     public static final Uri VIDEOS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/videos");
+    public static final Uri VIDEO_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/video");
     public static final Uri THUMBNAILS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/null_thumbnails");
 
     public boolean onCreate() {
@@ -92,6 +97,11 @@ public class YoutubeProvider extends ContentProvider {
                 queryBuilder.appendWhere(YoutubeDatabase.ID + "="
                         + uri.getLastPathSegment());
                 break;
+            case GET_VIDEO_ID:
+                queryBuilder.setTables(YoutubeDatabase.TABLE_VIDEOS);
+                queryBuilder.appendWhere(YoutubeDatabase.ID + "="
+                        + uri.getLastPathSegment());
+                break;
             case GET_PLAYLIST_VIDEOS:
                 queryBuilder.setTables(YoutubeDatabase.TABLE_VIDEOS);
                 queryBuilder.appendWhere(YoutubeDatabase.COL_PLAYLIST_ID + " = '"
@@ -109,6 +119,7 @@ public class YoutubeProvider extends ContentProvider {
                 queryBuilder.appendWhere(YoutubeDatabase.COL_THUMBNAIL_BITMAP + " is null and ");
                 queryBuilder.appendWhere(YoutubeDatabase.COL_THUMBNAIL_URL + " is not null");
                 break;
+
             default:
                 throw new IllegalArgumentException("Unknown URI");
         }

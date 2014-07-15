@@ -1,22 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:padding="@dimen/activity_vertical_margin"
+    android:padding="0dp"
     android:layout_height="match_parent">
 
-    <TextView
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:paddingBottom="10dp"
-        android:id="@+id/descTitleTextView"
-        android:text="Video Title"/>
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/descDescriptionTextView"
-        android:text="Description" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="20sp"
+                    android:padding="@dimen/activity_vertical_margin"
+                    android:id="@+id/descTitleTextView"
+                    android:text="Video Title"/>
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:id="@+id/watchVideoButton"
+                    android:text="Watch"/>
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/activity_vertical_margin"
+                android:scrollbars="vertical"
+                android:isScrollContainer="true"
+                android:id="@+id/descDescriptionTextView"
+                android:text="Description" />
+
+        </LinearLayout>
+
+    </ScrollView>
 </LinearLayout>
+

@@ -39,9 +39,9 @@
         <provider
             android:authorities="com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider"
             android:name="com.appinforium.newthinktankcodingtutorials.data.YoutubeProvider" />
-        <service android:name=".service.PlaylistDownloaderService" />
         <service android:name=".service.PlaylistsDownloaderService" />
         <service android:name=".service.ThumbnailDownloaderService" />
+        <service android:name=".service.PlaylistUpdaterIntentService" />
 
     </application>
 
