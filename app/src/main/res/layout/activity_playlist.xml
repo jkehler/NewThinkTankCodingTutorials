@@ -7,14 +7,7 @@
     android:paddingRight="0dp"
     android:paddingTop="0dp"
     android:paddingBottom="0dp"
-    android:id="@+id/activityPlaylistLayoutRoot"
+    android:id="@+id/playlistLayoutRoot"
     tools:context="com.appinforium.newthinktankcodingtutorials.PlaylistActivity">
-
-    <fragment
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:name="com.appinforium.newthinktankcodingtutorials.VideoListFragment"
-        android:id="@+id/fragmentVideoList"
-        tools:layout="@layout/fragment_video_list" />
 
 </LinearLayout>

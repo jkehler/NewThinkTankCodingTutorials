@@ -7,22 +7,23 @@
     android:paddingRight="0dp"
     android:paddingTop="0dp"
     android:paddingBottom="0dp"
+    android:id="@+id/activityPlaylistLayoutRoot"
     tools:context="com.appinforium.newthinktankcodingtutorials.PlaylistActivity">
 
     <fragment
         android:layout_width="match_parent"
-        android:layout_weight="1"
         android:layout_height="match_parent"
         android:name="com.appinforium.newthinktankcodingtutorials.VideoListFragment"
         android:id="@+id/fragmentVideoList"
+        android:layout_weight="2"
         tools:layout="@layout/fragment_video_list" />
 
     <fragment
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
         android:name="com.appinforium.newthinktankcodingtutorials.VideoDetailFragment"
         android:id="@+id/fragmentVideoDetail"
+        android:layout_weight="1"
         tools:layout="@layout/fragment_video_detail" />
 
 </LinearLayout>

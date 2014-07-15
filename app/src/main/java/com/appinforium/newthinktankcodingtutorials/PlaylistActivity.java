@@ -28,7 +28,7 @@ public class PlaylistActivity extends Activity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_playlist_dynamic);
+        setContentView(R.layout.activity_playlist);
 
         Log.d(DEBUG_TAG, "onCreate called - savedInstanceState: " + savedInstanceState);
 //        if (savedInstanceState == null) {
