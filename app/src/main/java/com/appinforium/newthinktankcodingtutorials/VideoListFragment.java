@@ -2,6 +2,7 @@ package com.appinforium.newthinktankcodingtutorials;
 
 import android.app.ListFragment;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -50,6 +51,9 @@ public class VideoListFragment extends ListFragment {
 
         PlaylistCursorAdapter adapter = new PlaylistCursorAdapter(getActivity(), cursor, true);
         setListAdapter(adapter);
+
+        ListView listView = this.getListView();
+        listView.setBackgroundColor(Color.parseColor("#000000"));
     }
 
     @Override

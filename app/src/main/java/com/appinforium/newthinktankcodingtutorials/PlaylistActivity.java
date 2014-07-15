@@ -16,9 +16,9 @@ import com.appinforium.newthinktankcodingtutorials.service.PlaylistUpdaterIntent
 public class PlaylistActivity extends Activity implements
         VideoListFragment.OnVideoSelectedListener {
 
-    String playlistId;
-    String playlistTitle;
-    boolean isDynamic;
+    private String playlistId;
+    private String playlistTitle;
+    private boolean isDynamic;
 
     private final static String PLAYLIST_ID = "PLAYLIST_ID";
     private final static String PLAYLIST_TITLE = "PLAYLIST_TITLE";
